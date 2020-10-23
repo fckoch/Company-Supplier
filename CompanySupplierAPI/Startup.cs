@@ -36,8 +36,9 @@ namespace CompanySupplierAPI
             services.AddDbContext<CompanySupplierContext>(options => options.UseSqlServer(_configuration.GetConnectionString("CompanySupplier")));
             services.AddScoped<EmpresaService>();
             services.AddScoped<FornecedorService>();
-            services.AddScoped<Validator>();
             services.AddAutoMapper(typeof(Startup));
+
+            services.AddCors();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -50,7 +51,13 @@ namespace CompanySupplierAPI
 
             app.UseHttpsRedirection();
 
+            app.UseCors(x => x
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader());
+
             app.UseRouting();
+
 
             app.UseAuthorization();
 

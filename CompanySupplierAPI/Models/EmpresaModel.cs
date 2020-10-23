@@ -10,16 +10,13 @@ namespace CompanySupplierAPI.Models
 {
     public class EmpresaModel
     {
-        [Required]
         [ValidUF(ErrorMessage = "UF inválido")]
         public string UF { get; set; }
-        [Required]
-        [RegularExpression(@"^[a-zA-Z]+$", ErrorMessage = "Nome inválido, apenas letras são permitidas")]
+        [Required(ErrorMessage = "Nome fantasia inválido")]
+        [RegularExpression(@"^[A-Za-záàâãéèêíïóôõöúçñÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ ]+$", ErrorMessage = "Nome fantasia inválido, apenas letras são permitidas")]
         public string NomeFantasia { get; set; }
-        [Required]
         [ValidCPFCNPJ(ErrorMessage = "CNPJ inválido")]
         public string CNPJ { get; set; }
-        [Required]
         public virtual ICollection<Fornecedor> Fornecedors { get; set; }
     }
 }

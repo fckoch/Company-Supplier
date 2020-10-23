@@ -73,5 +73,4 @@ namespace CompanySupplierAPI.Helpers
             }
         }
     }
-    }
 }

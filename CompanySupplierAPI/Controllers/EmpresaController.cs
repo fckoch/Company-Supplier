@@ -56,6 +56,21 @@ namespace CompanySupplierAPI.Controllers
             }
         }
 
+        //GET CNPJ list by query
+        [HttpGet("search")]
+        public async Task<ActionResult<CNPJModel[]>> GetCNPJList ([FromQuery] EmpresaParameters empresaParameters)
+        {
+            try
+            {
+                var CNPJList = await _empresaService.GetEmpresasCNPJByQueryAsync(empresaParameters);
+                return CNPJList;
+            }
+            catch (Exception ex)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError, $"Falha no banco de dados - {ex.ToString()}");
+            }
+        }
+
         //Post
         [HttpPost]
         public async Task<ActionResult<EmpresaModel>> Post(EmpresaModel model)

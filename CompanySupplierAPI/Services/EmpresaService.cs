@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using CompanySupplierAPI.Data;
+using CompanySupplierAPI.Models;
 using CompanySupplierAPI.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -48,6 +49,13 @@ namespace CompanySupplierAPI.Services
             IQueryable<Empresa> query = _context.Empresas;
             query = query.OrderBy(e => e.NomeFantasia).Include(e => e.Fornecedors).ThenInclude(f => f.Telefones);
             return await query.ToArrayAsync();
+        }
+
+        public async Task<CNPJModel[]> GetEmpresasCNPJByQueryAsync(EmpresaParameters empresaParameters)
+        {
+            IQueryable<Empresa> query = _context.Empresas;
+            query = query.OrderBy(e => e.CNPJ).Where(e => e.CNPJ.Substring(0, empresaParameters.CNPJ.Length) == empresaParameters.CNPJ);
+            return await query.Select(e => new CNPJModel { CNPJ = e.CNPJ, EmpresaId = e.EmpresaId, UF = e.UF, NomeFantasia = e.NomeFantasia}).ToArrayAsync();
         }
     }
 }
