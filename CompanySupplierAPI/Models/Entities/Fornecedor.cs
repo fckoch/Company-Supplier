@@ -13,7 +13,7 @@ namespace CompanySupplierAPI.Models.Entities
         public DateTime DataCadastro { get; set; }
         public virtual ICollection<Telefone> Telefones { get; set; }
         public string RG { get; set; }
-        public DateTime DataNascimento { get; set; }
+        public DateTime? DataNascimento { get; set; }
         public int EmpresaId { get; set; }
     }
 }

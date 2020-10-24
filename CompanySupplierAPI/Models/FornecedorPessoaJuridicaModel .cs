@@ -8,20 +8,22 @@ using System.Threading.Tasks;
 
 namespace CompanySupplierAPI.Models
 {
-    public class FornecedorModel
+    public class FornecedorPessoaJuridicaModel
     {
-        [Required]
+        [Required(ErrorMessage = "Necessário incluir o nome do fornecedor")]
         [RegularExpression(@"^[a-zA-Z]+$", ErrorMessage = "Nome inválido, apenas letras são permitidas")]
         public string Nome { get; set; }
-        [Required]
+        [Required(ErrorMessage = "Necessário incluir o CNPJ do fornecedor")]
+        [ValidCNPJ(ErrorMessage = "CNPJ inválido")]
         public string CPFCNPJ { get; set; }
         [Required]
         public DateTime DataCadastro{ get; set; }
         [Required]
-        [Phone]
-        public virtual ICollection<Telefone> Telefones { get; set; }
-        [ValidRG(ErrorMessage = "RG inválido")]
-        public string RG { get; set; }
-        public DateTime DataNascimento { get; set; }
+        public virtual ICollection<TelefoneModel> Telefones { get; set; }
+
+        public FornecedorPessoaJuridicaModel()
+        {
+            this.DataCadastro = DateTime.Now;
+        }
     }
 }

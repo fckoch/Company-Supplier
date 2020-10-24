@@ -8,6 +8,9 @@ class EmpresaService {
             UF,
         });
     }
+    getEmpresasByCNPJQuery(query) {
+        return axios.get(`https://localhost:5001/api/empresas/search?cnpj=${query}`)
+    }
 }
 
 export default new EmpresaService();

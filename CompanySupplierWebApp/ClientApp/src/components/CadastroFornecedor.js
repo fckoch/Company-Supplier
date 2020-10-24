@@ -1,26 +1,43 @@
-import React, { Component, Fragment} from 'react';
-import { Form, Button, Table, Alert, Col, Row} from 'react-bootstrap';
-import FornecedorService from '../services/fornecedorService.js';
+import React, { Component } from 'react';
+import { Form, Button, Alert, Col, Row} from 'react-bootstrap';
+import EmpresaService from '../services/empresaService.js';
 import { AsyncTypeahead } from 'react-bootstrap-typeahead';
-import Axios from 'axios';
+import FornecedorService from '../services/fornecedorService.js';
 
 class CadastroFornecedor extends Component {
   constructor(props) {
-    super(props);
+    super();
     this.state = {
       options: [],
       isLoading: false,
       cnpjEmpresa: '',
+      cnpjEmpresaIsInvalid:'',
+      cnpjEmpresaErrorMessage: '',
       empresaId: '',
       ufEmpresa: '',
       nomeFantasiaEmpresa: '',
       nomeFornecedor: '',
       nomeFornecedorIsInvalid: false,
+      nomeFornecedorErrorMessage: '',
       telefoneInput: '',
-      telefoneInputIsInvalid: false,
       telefones: [],
       pessoaFisicaChecked: false,
       pessoaJuridicaChecked: false,
+      cnpjFornecedor: '',
+      cnpjFornecedorIsInvalid: false,
+      cnpjFornecedorErrorMessage: '',
+      cpfFornecedor: '',
+      cpfFornecedorIsInvalid: false,
+      cpfFornecedorErrorMessage: '',
+      dataNascimentoFornecedor: '',
+      dataNascimentoFornecedorIsInvalid: false,
+      dataNascimentoFornecedorErrorMessage: '',
+      rgFornecedor: '',
+      rgFornecedorIsInvalid: false,
+      rgFornecedorErrorMessage: '',
+      alertMessage: '',
+      displayAlert: false,
+      alertType: ''
     }
   }
 
@@ -36,10 +53,39 @@ class CadastroFornecedor extends Component {
     }
   }
 
+  onChangeRGFornecedor = (e) => {
+    this.setState({
+      rgFornecedor: e.target.value,
+      displayAlert: false
+    })
+  }
+
+  onChangeDataNascimentoFornecedor = (e) => {
+    this.setState({
+      dataNascimentoFornecedor: e.target.value,
+      displayAlert: false
+    })
+  }
+
+  onChangeCNPJFornecedor = (e) => {
+    this.setState({
+      cnpjFornecedor: e.target.value,
+      displayAlert: false
+    })
+  }
+
+  onChangeCPFFornecedor = (e) => {
+    this.setState({
+      cpfFornecedor: e.target.value,
+      displayAlert: false
+    })
+  }
+
   onChangePessoaFisica = () => {
     this.setState({
       pessoaFisicaChecked: true,
       pessoaJuridicaChecked: false,
+      cnpjFornecedor: ''
     })
   }
 
@@ -47,18 +93,23 @@ class CadastroFornecedor extends Component {
     this.setState({
       pessoaFisicaChecked: false,
       pessoaJuridicaChecked: true,
+      cpfFornecedor: '',
+      rgFornecedor: '',
+      dataNascimentoFornecedor: ''
     })
   }
 
   onChangeTelefoneInput = (e) => {
     this.setState({
-      telefoneInput: e.target.value
+      telefoneInput: e.target.value,
+      displayAlert: false
     })
   }
 
   onChangeNomeFornecedor = (e) => {
     this.setState({
-      nomeFornecedor: e.target.value
+      nomeFornecedor: e.target.value,
+      displayAlert: false
     })
   }
 
@@ -66,15 +117,17 @@ class CadastroFornecedor extends Component {
     this.setState({
       cnpjEmpresa: input,
       ufEmpresa: '',
-      nomeFantasiaEmpresa: ''
+      nomeFantasiaEmpresa: '',
+      empresaId: '',
+      displayAlert: false,
     })
   }
 
   handleSearch = (query) => {
     this.setState({
       isLoading: true
-    })
-    Axios.get(`https://localhost:5001/api/empresas/search?cnpj=${query}`)
+    });
+    EmpresaService.getEmpresasByCNPJQuery(query)
     .then(response => {
       const options = response.data.map((i) => ({
         empresaId: i.empresaId,
@@ -102,16 +155,191 @@ class CadastroFornecedor extends Component {
 
   adicionarTelefone = (telefone) => {
     const telefones = this.state.telefones;
-    telefones.push(telefone);
+    telefones.push({"Numero": telefone});
     this.setState({
       telefones: telefones,
       telefoneInput: ''
     })
   }
 
-  onSubmit = () => {
-    console.log(this.state.nomeFantasiaEmpresa)
+  validateEmpresaSelection = () => {
+    let isError = false;
+    if (this.state.empresaId === '') {
+      isError = true
+    }
+    else {
+      isError = false
+    }
+    return isError;
   }
+
+  onSubmitPessoaJuridica = () => {
+    const err = this.validateEmpresaSelection();
+    if (!err) {
+      FornecedorService.addNewFornecedorPessoaJuridica(this.state.empresaId, this.state.nomeFornecedor, this.state.cnpjFornecedor, this.state.telefones)
+      .then(response => {
+      if (response.status === 201) 
+        this.setState({
+          nomeFornecedor: '',
+          telefones: [],
+          cnpjFornecedor: '',
+          alertMessage: 'Fornecedor cadastrado com sucesso',
+          displayAlert: true,
+          alertType: 'success',
+          nomeFornecedorErrorMessage: '',
+          nomeFornecedorIsInvalid: false,
+          cnpjEmpresaErrorMessage: '',
+          cnpjFornecedorIsInvalid: false
+
+        })
+      })
+      .catch(error => {
+        if (error.response.status === 400) {
+          if (error.response.data.errors.Nome) {
+            this.setState({
+              nomeFornecedorErrorMessage: error.response.data.errors.Nome[0],
+              nomeFornecedorIsInvalid: true,
+            })
+          }
+          else if (error.response.data.errors.Nome === undefined) {
+            this.setState({
+              nomeFornecedorErrorMessage: '',
+              nomeFornecedorIsInvalid: false,
+            })
+          }
+          if (error.response.data.errors.CPFCNPJ) {
+            this.setState({
+              cnpjFornecedorErrorMessage: error.response.data.errors.CPFCNPJ[0],
+              cnpjFornecedorIsInvalid: true
+            })
+          }
+          else if (error.response.data.errors.CPFCNPJ === undefined) {
+            this.setState({
+              cnpjFornecedorErrorMessage: '',
+              cnpjFornecedorIsInvalid: false
+            })
+          }
+          this.setState({
+            alertMessage: 'Falha ao cadastrar o fornecedor',
+            displayAlert: true,
+            alertType: 'danger',
+          })
+        }
+        else {
+          this.setState({
+            alertMessage: 'Falha ao cadastrar o fornecedor',
+            displayAlert: true,
+            alertType: 'danger',
+          })
+        }
+      })
+    } else {
+      this.setState({
+        alertMessage: 'Empresa não foi selecionada',
+        displayAlert: true,
+        alertType: 'danger',
+      })
+    }
+  }
+
+  onSubmitPessoaFisica = () => {
+    const err = this.validateEmpresaSelection();
+    if (!err) {
+      FornecedorService.addNewFornecedorPessoaFisica(this.state.empresaId, this.state.nomeFornecedor, this.state.cpfFornecedor, this.state.telefones, this.state.rgFornecedor, this.state.dataNascimentoFornecedor)
+      .then(response => {
+        if (response.status === 201) 
+        this.setState({
+          nomeFornecedor: '',
+          telefones: [],
+          cpfFornecedor: '',
+          rgFornecedor: '',
+          dataNascimentoFornecedor: '',
+          alertMessage: 'Fornecedor cadastrado com sucesso',
+          displayAlert: true,
+          alertType: 'success',
+          nomeFornecedorErrorMessage: '',
+          nomeFornecedorIsInvalid: false,
+          cpfFornecedorErrorMessage: '',
+          cpfFornecedorIsInvalid: false,
+          rgFornecedorErrorMessage: '',
+          rgFornecedorIsInvalid: false,
+          dataNascimentoFornecedorErrorMessage: '',
+          dataNascimentoFornecedorIsInvalid: false,
+        })
+      })
+      .catch(error => {
+        if (error.response.status === 400) {
+          if (error.response.data.errors.Nome) {
+            this.setState({
+              nomeFornecedorErrorMessage: error.response.data.errors.Nome[0],
+              nomeFornecedorIsInvalid: true,
+            })
+          }
+          else if (error.response.data.errors.Nome === undefined) {
+            this.setState({
+              nomeFornecedorErrorMessage: '',
+              nomeFornecedorIsInvalid: false,
+            })
+          }
+          if (error.response.data.errors.CPFCNPJ) {
+            this.setState({
+              cpfFornecedorErrorMessage: error.response.data.errors.CPFCNPJ[0],
+              cpfFornecedorIsInvalid: true
+            })
+          }
+          else if (error.response.data.errors.CPFCNPJ === undefined) {
+            this.setState({
+              cpfFornecedorErrorMessage: '',
+              cpfFornecedorIsInvalid: false
+            })
+          }
+          if (error.response.data.errors.RG) {
+            this.setState({
+              rgFornecedorErrorMessage: error.response.data.errors.RG[0],
+              rgFornecedorIsInvalid: true
+            })
+          }
+          else if (error.response.data.errors.RG === undefined) {
+            this.setState({
+              rgFornecedorErrorMessage: '',
+              rgFornecedorIsInvalid: false
+            })
+          }
+          if (error.response.data.errors.DataNascimento) {
+            this.setState({
+              dataNascimentoFornecedorErrorMessage: error.response.data.errors.DataNascimento[0],
+              dataNascimentoFornecedorIsInvalid: true
+            })
+          }
+          else if (error.response.data.errors.DataNascimento === undefined) {
+            this.setState({
+              dataNascimentoFornecedorErrorMessage: '',
+              dataNascimentoFornecedorIsInvalid: false
+            })
+          }
+          this.setState({
+            alertMessage: 'Falha ao cadastrar o fornecedor',
+            displayAlert: true,
+            alertType: 'danger',
+          })
+        }
+        else {
+          this.setState({
+            alertMessage: 'Falha ao cadastrar o fornecedor',
+            displayAlert: true,
+            alertType: 'danger',
+          })
+        }
+      })
+    } else {
+      this.setState({
+        alertMessage: 'Empresa não foi selecionada',
+        displayAlert: true,
+        alertType: 'danger',
+      })
+    }
+  }
+
 
   render() {
 
@@ -152,21 +380,18 @@ class CadastroFornecedor extends Component {
             </Form.Row>
             <h5 style={{paddingTop: "10px"}}>Dados de cadastro do fornecedor</h5>
           </Form>
-          <Form.Group controlId="validationCustom01">
+          <Form.Group controlId="validationNomeFornecedor">
             <Form.Label>Nome</Form.Label>
             <Form.Control value={this.state.nomeFornecedor} isInvalid={this.state.nomeFornecedorIsInvalid} onChange={this.onChangeNomeFornecedor} type="text" placeholder="Digite o nome do fornecedor" />
             <Form.Control.Feedback type="invalid">
-            {this.state.nomeFantasiaErrorMessage}
+            {this.state.nomeFornecedorErrorMessage}
             </Form.Control.Feedback>
           </Form.Group>
           <Form.Row>
             <Col>
-              <Form.Group controlId="validationCustom01">
+              <Form.Group controlId="validationTelefoneFornecedor">
                 <Form.Label>Telefone</Form.Label>
-                <Form.Control value={this.state.telefoneInput} isInvalid={this.state.telefoneInputIsInvalid} onChange={this.onChangeTelefoneInput} type="text" placeholder="Adicione o telefone do fornecedor" />
-                <Form.Control.Feedback type="invalid">
-                {this.state.nomeFantasiaErrorMessage}
-                </Form.Control.Feedback>
+                <Form.Control value={this.state.telefoneInput} onChange={this.onChangeTelefoneInput} type="text" placeholder="Adicione o telefone do fornecedor" />
               </Form.Group>
             </Col>
             <Col xs="auto">
@@ -177,10 +402,10 @@ class CadastroFornecedor extends Component {
           </Form.Row>
           {this.state.telefones.map((item, index) => {
             return (
-              <div className="wrapper-telefone" style={{padding: "5px 0px 5px 0px"}}>
+              <div key={index} className="wrapper-telefone" style={{padding: "5px 0px 5px 0px"}}>
                 <Form.Row>
                   <Col xs="auto">
-                    <Form.Control type="text" value={item} readOnly />
+                    <Form.Control type="text" value={item.Numero} readOnly />
                   </Col>
                   <Col xs="auto">
                     <Button onClick={() => this.removerTelefone(item)} style={{margin: "0px"}} variant="primary" type="submit">
@@ -214,50 +439,69 @@ class CadastroFornecedor extends Component {
           </fieldset>
           {this.state.pessoaJuridicaChecked === true ? 
           <div className="pessoa-juridica">
-            <Form.Group controlId="validationCustom02">
+            <Form.Group controlId="validationCNPJFornecedor">
               <Form.Label>CNPJ</Form.Label>
-              <Form.Control value={this.state.cnpj} isInvalid={this.state.cnpjIsInvalid} onChange={this.onChangeCNPJ} type="text" placeholder="Digite o CNPJ do fornecedor" />
+              <Form.Control value={this.state.cnpjFornecedor} isInvalid={this.state.cnpjFornecedorIsInvalid} onChange={this.onChangeCNPJFornecedor} type="text" placeholder="Digite o CNPJ do fornecedor" />
               <Form.Control.Feedback type="invalid">
-              {this.state.cnpjErrorMessage}
+              {this.state.cnpjFornecedorErrorMessage}
               </Form.Control.Feedback>
               <Form.Text id="CNPJHelp" muted>
               CNPJ deve conter caracteres separadores (Exemplo: XX.XXX.XXX/XXXX-XX)
               </Form.Text>
             </Form.Group>
+            <div className="text-center">
+              <Button onClick={this.onSubmitPessoaJuridica} style={{margin: "10px 0px 30px"}} variant="primary" type="submit">
+                Cadastrar
+              </Button>
+            </div>
           </div>
           :
           ''}
           {this.state.pessoaFisicaChecked === true ?
           <div className="pessoa-fisica">
-            <Form.Group controlId="validationCustom02">
-              <Form.Label>CPF</Form.Label>
-              <Form.Control value={this.state.cnpj} isInvalid={this.state.cnpjIsInvalid} onChange={this.onChangeCNPJ} type="text" placeholder="Digite o CPF do fornecedor" />
-              <Form.Control.Feedback type="invalid">
-              {this.state.cnpjErrorMessage}
-              </Form.Control.Feedback>
-              <Form.Text id="CNPJHelp" muted>
-              CPF deve conter caracteres separadores (Exemplo: XXX.XXX.XXX-XX)
-              </Form.Text>
-            </Form.Group>
-            <Form.Group controlId="validationCustom02">
-              <Form.Label>RG</Form.Label>
-              <Form.Control value={this.state.cnpj} isInvalid={this.state.cnpjIsInvalid} onChange={this.onChangeCNPJ} type="text" placeholder="Digite o RG do fornecedor" />
-              <Form.Control.Feedback type="invalid">
-              {this.state.cnpjErrorMessage}
-              </Form.Control.Feedback>
-              <Form.Text id="CNPJHelp" muted>
-              RG deve conter caracteres separadores (Exemplo: X.XXX.XXX)
-              </Form.Text>
-            </Form.Group>
-            <Form.Group controlId="validationCustom02">
+            <Form.Row>
+              <Col>
+                <Form.Group controlId="validationCPFFornecedor">
+                  <Form.Label>CPF</Form.Label>
+                  <Form.Control value={this.state.cpfFornecedor} isInvalid={this.state.cpfFornecedorIsInvalid} onChange={this.onChangeCPFFornecedor} type="text" placeholder="Digite o CPF do fornecedor" />
+                  <Form.Control.Feedback type="invalid">
+                  {this.state.cpfFornecedorErrorMessage}
+                  </Form.Control.Feedback>
+                  <Form.Text id="CPFHelp" muted>
+                  CPF deve conter caracteres separadores (Exemplo: XXX.XXX.XXX-XX)
+                  </Form.Text>
+                </Form.Group>
+              </Col>
+              <Col>
+                <Form.Group controlId="validationRGFornecedor">
+                  <Form.Label>RG</Form.Label>
+                  <Form.Control value={this.state.rgFornecedor} isInvalid={this.state.rgFornecedorIsInvalid} onChange={this.onChangeRGFornecedor} type="text" placeholder="Digite o RG do fornecedor" />
+                  <Form.Control.Feedback type="invalid">
+                  {this.state.rgFornecedorErrorMessage}
+                  </Form.Control.Feedback>
+                  <Form.Text id="RGHelp" muted>
+                  RG deve conter caracteres separadores (Exemplo: X.XXX.XXX)
+                  </Form.Text>
+                </Form.Group>
+              </Col>
+            </Form.Row>
+            <Form.Group controlId="validationDataNascimentoFornecedor">
               <Form.Label>Data de nascimento</Form.Label>
-              <Form.Control value={this.state.cnpj} isInvalid={this.state.cnpjIsInvalid} onChange={this.onChangeCNPJ} type="text" placeholder="Digite a data de nascimento" />
+              <Form.Control value={this.state.dataNascimentoFornecedor} isInvalid={this.state.dataNascimentoFornecedorIsInvalid} onChange={this.onChangeDataNascimentoFornecedor} type="date" placeholder="Digite a data de nascimento" />
               <Form.Control.Feedback type="invalid">
-              {this.state.cnpjErrorMessage}
+              {this.state.dataNascimentoFornecedorErrorMessage}
               </Form.Control.Feedback>
             </Form.Group>
+            <div className="text-center">
+              <Button onClick={this.onSubmitPessoaFisica} style={{margin: "10px 0px 30px"}} variant="primary" type="submit">
+                Cadastrar
+              </Button>
+            </div>
           </div>
           : ''}
+          <Alert style={{textAlign:"center"}}show={this.state.displayAlert} variant={this.state.alertType}>
+            {this.state.alertMessage}
+          </Alert>
         </div>
       </div>
     );

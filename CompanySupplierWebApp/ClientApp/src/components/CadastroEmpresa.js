@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Form, Button, Table } from 'react-bootstrap';
+import { Form, Button } from 'react-bootstrap';
 import EmpresaService from '../services/empresaService.js';
 import Alert from 'react-bootstrap/Alert';
 
@@ -113,6 +113,7 @@ class CadastroEmpresa extends Component {
   render() {
 
     const UFs = ["AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO"];
+    
     return (
       <div className="wrapper-1">
         <div className="wrapper-cadastro-empresa">

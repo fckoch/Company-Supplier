@@ -15,7 +15,7 @@ namespace CompanySupplierAPI.Models
         [Required(ErrorMessage = "Nome fantasia inválido")]
         [RegularExpression(@"^[A-Za-záàâãéèêíïóôõöúçñÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ ]+$", ErrorMessage = "Nome fantasia inválido, apenas letras são permitidas")]
         public string NomeFantasia { get; set; }
-        [ValidCPFCNPJ(ErrorMessage = "CNPJ inválido")]
+        [ValidCNPJ(ErrorMessage = "CNPJ inválido")]
         public string CNPJ { get; set; }
         public virtual ICollection<Fornecedor> Fornecedors { get; set; }
     }

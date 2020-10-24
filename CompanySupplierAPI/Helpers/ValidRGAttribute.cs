@@ -14,6 +14,7 @@ namespace CompanySupplierAPI.Helpers
             {
                 string RG = value.ToString();
                 //Código de https://pastebin.com/YcVme9vX
+
                 // Pegar os 8 primeiros dígitos e multiplicar o primeiro por 2, e cada número subir + 1 até chegar em 9
                 RG = RG.Replace(".", "").Replace("-", "").Replace(",", "").Replace(" ", "").Trim();
 

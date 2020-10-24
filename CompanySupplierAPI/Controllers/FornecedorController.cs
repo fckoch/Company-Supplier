@@ -60,18 +60,53 @@ namespace CompanySupplierAPI.Controllers
         }
 
         //Post
-        [HttpPost]
-        public async Task<ActionResult<FornecedorModel>> Post (FornecedorModel model, int empresaId)
+        [HttpPost("juridica")]
+        public async Task<ActionResult<FornecedorPessoaJuridicaModel>> PostPessoaJuridica (FornecedorPessoaJuridicaModel model, int empresaId)
         {
             try
             {
                 var empresa = await _empresaService.GetEmpresaByIdAsync(empresaId);
                 var fornecedor = _mapper.Map<Fornecedor>(model);
+
                 empresa.Fornecedors.Add(fornecedor);
 
                 if (await _fornecedorService.SaveChangesAsync())
                 {
-                    return Created($"api/empresas/{fornecedor.FornecedorId}/fornecedores/{fornecedor.FornecedorId}", _mapper.Map<FornecedorModel>(fornecedor));
+                    return Created($"api/empresas/{fornecedor.FornecedorId}/fornecedores/{fornecedor.FornecedorId}", _mapper.Map<FornecedorPessoaJuridicaModel>(fornecedor));
+                }
+
+                else
+                {
+                    return BadRequest("Falha ao adicionar um novo fornecedor");
+                }
+            }
+            catch (Exception ex)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError, $"Falha no banco de dados - {ex.ToString()}");
+            }
+        }
+
+        //Post
+        [HttpPost("fisica")]
+        public async Task<ActionResult<FornecedorPessoaFisicaModel>> PostPessoaFisica(FornecedorPessoaFisicaModel model, int empresaId)
+        {
+            try
+            {
+                var empresa = await _empresaService.GetEmpresaByIdAsync(empresaId);
+                var fornecedor = _mapper.Map<Fornecedor>(model);
+
+                var today = DateTime.Today;
+                var idadeFornecedor = today.Year - fornecedor.DataNascimento.Value.Year;
+                if (empresa.UF == "PR" && idadeFornecedor < 18)
+                {
+                    return BadRequest("Não é permitido cadastro de fornecedor menor de idade em empresa do PR");
+                }
+
+                empresa.Fornecedors.Add(fornecedor);
+
+                if (await _fornecedorService.SaveChangesAsync())
+                {
+                    return Created($"api/empresas/{fornecedor.FornecedorId}/fornecedores/{fornecedor.FornecedorId}", _mapper.Map<FornecedorPessoaFisicaModel>(fornecedor));
                 }
 
                 else

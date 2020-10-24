@@ -17,6 +17,16 @@ namespace CompanySupplierAPI.Data
 
             CreateMap<FornecedorModel, Fornecedor>()
             .ReverseMap();
+
+            CreateMap<FornecedorPessoaJuridicaModel, Fornecedor>()
+            .ReverseMap();
+
+            CreateMap<FornecedorPessoaFisicaModel, Fornecedor>()
+            .ReverseMap();
+
+            CreateMap<TelefoneModel, Telefone>()
+            .ReverseMap();
+             
         }
     }
 }

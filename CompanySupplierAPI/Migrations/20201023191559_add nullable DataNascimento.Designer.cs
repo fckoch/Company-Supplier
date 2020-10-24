@@ -4,14 +4,16 @@ using CompanySupplierAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace CompanySupplierAPI.Migrations
 {
     [DbContext(typeof(CompanySupplierContext))]
-    partial class CompanySupplierContextModelSnapshot : ModelSnapshot
+    [Migration("20201023191559_add nullable DataNascimento")]
+    partial class addnullableDataNascimento
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
