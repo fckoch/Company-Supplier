@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using CompanySupplierAPI.Data;
+using CompanySupplierAPI.Models;
 using CompanySupplierAPI.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -24,6 +25,27 @@ namespace CompanySupplierAPI.Services
         {
             IQueryable<Fornecedor> query = _context.Fornecedores;
             query = query.Where(f => f.EmpresaId == EmpresaId).Include(f => f.Telefones);
+            return await query.ToArrayAsync();
+        }
+
+        public async Task<Fornecedor[]> GetFornecedorByIdOrderedByNomeAsync(int EmpresaId)
+        {
+            IQueryable<Fornecedor> query = _context.Fornecedores;
+            query = query.Where(f => f.EmpresaId == EmpresaId).OrderBy(f => f.Nome).Include(f => f.Telefones);
+            return await query.ToArrayAsync();
+        }
+
+        public async Task<Fornecedor[]> GetFornecedorByIdOrderedByCPFCNPJAsync(int EmpresaId)
+        {
+            IQueryable<Fornecedor> query = _context.Fornecedores;
+            query = query.Where(f => f.EmpresaId == EmpresaId).OrderBy(f => f.CPFCNPJ).Include(f => f.Telefones);
+            return await query.ToArrayAsync();
+        }
+
+        public async Task<Fornecedor[]> GetFornecedorByIdOrderedByDataCadastroAsync(int EmpresaId)
+        {
+            IQueryable<Fornecedor> query = _context.Fornecedores;
+            query = query.OrderBy(f => f.CPFCNPJ).Where(f => f.EmpresaId == EmpresaId).OrderBy(f => f.DataCadastro).Include(f => f.Telefones);
             return await query.ToArrayAsync();
         }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using CompanySupplierAPI.Helpers;
 using CompanySupplierAPI.Models;
 using CompanySupplierAPI.Models.Entities;
 using CompanySupplierAPI.Services;
@@ -18,22 +19,38 @@ namespace CompanySupplierAPI.Controllers
         private readonly EmpresaService _empresaService;
         private readonly FornecedorService _fornecedorService;
         private readonly IMapper _mapper;
+        private readonly Error _error;
 
-        public FornecedorController(EmpresaService empresaService, FornecedorService fornecedorService, IMapper mapper)
+        public FornecedorController(EmpresaService empresaService, FornecedorService fornecedorService, IMapper mapper, Error error)
         {
             _empresaService = empresaService;
             _fornecedorService = fornecedorService;
             _mapper = mapper;
+            _error = error;
         }
 
-        //Get all fornecedores from a empresa
+        //Get all Fornecedores from Empresa ordered by
         [HttpGet]
-        public async Task<ActionResult<FornecedorModel[]>> GetAllFornecedores (int empresaId)
+        public async Task<ActionResult<OutputFornecedorModel[]>> GetAllFornecedores ([FromQuery] FornecedorParameters fornecedorParameters, int empresaId)
         {
             try
             {
-                var fornecedores = await _fornecedorService.GetAllFornecedoresByEmpresaAsync(empresaId);
-                return _mapper.Map<FornecedorModel[]>(fornecedores);
+                var orderBy = fornecedorParameters.OrderBy;
+                switch (orderBy)
+                {
+                    case "Nome":
+                        var fornecedoresOrderedByNome = await _fornecedorService.GetFornecedorByIdOrderedByNomeAsync(empresaId);
+                        return _mapper.Map<OutputFornecedorModel[]>(fornecedoresOrderedByNome);
+                    case "CPFCNPJ":
+                        var fornecedoresOrderedByCPFCNPJ = await _fornecedorService.GetFornecedorByIdOrderedByCPFCNPJAsync(empresaId);
+                        return _mapper.Map<OutputFornecedorModel[]>(fornecedoresOrderedByCPFCNPJ);
+                    case "DataCadastro":
+                        var fornecedoresOrderedByDataCadastro = await _fornecedorService.GetFornecedorByIdOrderedByDataCadastroAsync(empresaId);
+                        return _mapper.Map<OutputFornecedorModel[]>(fornecedoresOrderedByDataCadastro);
+                }
+
+                return BadRequest("Query invalida");
+
             }
             catch (Exception ex)
             {
@@ -99,7 +116,8 @@ namespace CompanySupplierAPI.Controllers
                 var idadeFornecedor = today.Year - fornecedor.DataNascimento.Value.Year;
                 if (empresa.UF == "PR" && idadeFornecedor < 18)
                 {
-                    return BadRequest("Não é permitido cadastro de fornecedor menor de idade em empresa do PR");
+                    Error erro = new Error();
+                    return BadRequest(erro);
                 }
 
                 empresa.Fornecedors.Add(fornecedor);

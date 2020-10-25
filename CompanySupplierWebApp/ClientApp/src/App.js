@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Route } from 'react-router';
 import { Layout } from './components/Layout';
-import { Home } from './components/Home';
+import Home from './components/Home';
 import CadastroFornecedor from './components/CadastroFornecedor';
 import CadastroEmpresa from './components/CadastroEmpresa';
 import './custom.css'

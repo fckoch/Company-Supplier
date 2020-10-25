@@ -269,6 +269,18 @@ class CadastroFornecedor extends Component {
       })
       .catch(error => {
         if (error.response.status === 400) {
+          if (error.response.data.errors.dataNascimento) {
+            this.setState({
+              dataNascimentoFornecedorErrorMessage: error.response.data.errors.dataNascimento,
+              dataNascimentoFornecedorIsInvalid: true,
+            })
+          }
+          else if (error.response.data.errors.dataNascimento === undefined) {
+            this.setState({
+              dataNascimentoFornecedorErrorMessage: '',
+              dataNascimentoFornecedorIsInvalid: false,
+            })
+          }
           if (error.response.data.errors.Nome) {
             this.setState({
               nomeFornecedorErrorMessage: error.response.data.errors.Nome[0],
@@ -304,19 +316,7 @@ class CadastroFornecedor extends Component {
               rgFornecedorErrorMessage: '',
               rgFornecedorIsInvalid: false
             })
-          }
-          if (error.response.data.errors.DataNascimento) {
-            this.setState({
-              dataNascimentoFornecedorErrorMessage: error.response.data.errors.DataNascimento[0],
-              dataNascimentoFornecedorIsInvalid: true
-            })
-          }
-          else if (error.response.data.errors.DataNascimento === undefined) {
-            this.setState({
-              dataNascimentoFornecedorErrorMessage: '',
-              dataNascimentoFornecedorIsInvalid: false
-            })
-          }
+          } 
           this.setState({
             alertMessage: 'Falha ao cadastrar o fornecedor',
             displayAlert: true,

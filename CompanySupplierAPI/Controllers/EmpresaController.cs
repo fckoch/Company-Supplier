@@ -56,9 +56,9 @@ namespace CompanySupplierAPI.Controllers
             }
         }
 
-        //GET CNPJ list by query
+        //GET Empresa list by query
         [HttpGet("search")]
-        public async Task<ActionResult<CNPJModel[]>> GetCNPJList ([FromQuery] EmpresaParameters empresaParameters)
+        public async Task<ActionResult<CNPJModel[]>> GetEmpresaListByQuery ([FromQuery] EmpresaParameters empresaParameters)
         {
             try
             {

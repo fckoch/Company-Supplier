@@ -19,6 +19,9 @@ class FornecedorService {
             DataNascimento
         });
     }
+    getFornecedoresOrderedByQuery(empresaId, query) {
+        return axios.get(`https://localhost:5001/api/empresas/${empresaId}/fornecedores?orderby=${query}`)
+    }
 }
 
 export default new FornecedorService();
