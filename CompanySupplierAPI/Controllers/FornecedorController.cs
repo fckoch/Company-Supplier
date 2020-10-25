@@ -27,9 +27,9 @@ namespace CompanySupplierAPI.Controllers
             _mapper = mapper;
         }
 
-        //Get all Fornecedores from Empresa ordered by
+        //Get all Fornecedores from Empresa ordered by query
         [HttpGet]
-        public async Task<ActionResult<OutputFornecedorModel[]>> GetAllFornecedores ([FromQuery] FornecedorParameters fornecedorParameters, int empresaId)
+        public async Task<ActionResult<OutputFornecedorModel[]>> GetAllFornecedores ([FromQuery] QueryFornecedorParameters fornecedorParameters, int empresaId)
         {
             try
             {
@@ -56,7 +56,7 @@ namespace CompanySupplierAPI.Controllers
             }
         }
 
-        //Get a specific fornecedor from a empresa
+        //Get fornecedor from empresa
         [HttpGet("{fornecedorId:int}")]
         public async Task<ActionResult<FornecedorModel>> GetFornecedor (int fornecedorId)
         {
@@ -74,7 +74,7 @@ namespace CompanySupplierAPI.Controllers
             }
         }
 
-        //Post
+        //Post fornecedor Pessoa Juridica
         [HttpPost("juridica")]
         public async Task<ActionResult<FornecedorPessoaJuridicaModel>> PostPessoaJuridica (FornecedorPessoaJuridicaModel model, int empresaId)
         {
@@ -85,8 +85,8 @@ namespace CompanySupplierAPI.Controllers
                     return NotFound("Empresa não encontrada");
 
                 var fornecedor = _mapper.Map<Fornecedor>(model);
-                if (_fornecedorService.FornecedorExists(fornecedor.CPFCNPJ))
-                    return BadRequest("CNPJ já cadastrado no sistema");
+                if (_fornecedorService.FornecedorExistsOnEmpresa(fornecedor.CPFCNPJ, empresaId))
+                    return BadRequest("CNPJ já cadastrado no sistema na empresa selecionada");
 
                     empresa.Fornecedors.Add(fornecedor);
 
@@ -106,7 +106,7 @@ namespace CompanySupplierAPI.Controllers
             }
         }
 
-        //Post
+        //Post fornecedor Pessoa Fisica
         [HttpPost("fisica")]
         public async Task<ActionResult<FornecedorPessoaFisicaModel>> PostPessoaFisica(FornecedorPessoaFisicaModel model, int empresaId)
         {
@@ -117,8 +117,8 @@ namespace CompanySupplierAPI.Controllers
                     return NotFound("Empresa não encontrada");
 
                 var fornecedor = _mapper.Map<Fornecedor>(model);
-                if (_fornecedorService.FornecedorExists(fornecedor.CPFCNPJ))
-                    return BadRequest("CPF já cadastrado no sistema");
+                if (_fornecedorService.FornecedorExistsOnEmpresa(fornecedor.CPFCNPJ, empresaId))
+                    return BadRequest("CPF já cadastrado na empresa selecionada");
 
                 var today = DateTime.Today;
                 var idadeFornecedor = today.Year - fornecedor.DataNascimento.Value.Year;
@@ -145,9 +145,36 @@ namespace CompanySupplierAPI.Controllers
             }
         }
 
-        //Put
-        [HttpPut("{fornecedorId:int}")]
-        public async Task<ActionResult<FornecedorModel>> Put (FornecedorModel model, int fornecedorId)
+        //Put fornecedor pessoa fisica
+        [HttpPut("{fornecedorId:int}/fisica")]
+        public async Task<ActionResult<FornecedorModel>> PutFornecedorPessoaFisica (FornecedorPessoaFisicaModel model, int fornecedorId)
+        {
+            try
+            {
+                var fornecedor = await _fornecedorService.GetFornecedorByIdAsync(fornecedorId);
+                if (fornecedor == null)
+                    return NotFound("Fornecedor não encontrado");
+
+                _mapper.Map(model, fornecedor);
+
+                if (await _fornecedorService.SaveChangesAsync())
+                {
+                    return _mapper.Map<FornecedorModel>(fornecedor);
+                }
+                else
+                {
+                    return BadRequest("Falha ao atualizar fornecedor");
+                }
+            }
+            catch (Exception ex)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError, $"Falha no banco de dados - {ex.ToString()}");
+            }
+        }
+
+        //Put fornecedor pessoa juridica
+        [HttpPut("{fornecedorId:int}/juridica")]
+        public async Task<ActionResult<FornecedorModel>> PutFornecedorPessoaJuridica (FornecedorPessoaJuridicaModel model, int fornecedorId)
         {
             try
             {

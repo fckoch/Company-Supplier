@@ -2,10 +2,7 @@ import React, { Component } from 'react';
 import { AsyncTypeahead } from 'react-bootstrap-typeahead';
 import EmpresaService from '../services/empresaService.js';
 import FornecedorService from '../services/fornecedorService.js';
-import { Form, Button, Alert, Col, Row, Table} from 'react-bootstrap';
-import fornecedorService from '../services/fornecedorService.js';
-import { MdPhone } from "react-icons/md";
-import { IconContext } from "react-icons";
+import { Form, Col, Table} from 'react-bootstrap';
 
 class Home extends Component {
   constructor(props) {
@@ -19,8 +16,7 @@ class Home extends Component {
       empresaId: '',
       ufEmpresa: '',
       nomeFantasiaEmpresa: '',
-      fornecedores: [],
-      popOverShow: false,
+      fornecedores: []
     }
   }
 
@@ -84,7 +80,7 @@ class Home extends Component {
     return (
       telefonelist.map((numero, index) => {
         return (
-          <li style={{padding: '5px', display:'inline'}}>{numero}</li>
+          <li key={index} style={{padding: '5px', display:'inline'}}>{numero}</li>
         )
       })
     )
@@ -116,7 +112,7 @@ class Home extends Component {
                 id="async-search"
                 isLoading={this.state.isLoading}
                 labelKey="cnpj"
-                minLength={3}
+                minLength={1}
                 onSearch={this.handleSearch}
                 options={this.state.options}
                 placeholder="Pesquise por um CNPJ..."
@@ -152,7 +148,6 @@ class Home extends Component {
             <tbody>
               {this.state.fornecedores.map((fornecedor, index) => {
                 const { nome, cpfcnpj, dataCadastro, telefones} = fornecedor
-                var popOverShow = false;
                 return (
                   <tr key={index}>
                     <td>{nome}</td>

@@ -11,7 +11,7 @@ namespace CompanySupplierAPI.Models
     public class FornecedorPessoaJuridicaModel
     {
         [Required(ErrorMessage = "Necessário incluir o nome do fornecedor")]
-        [RegularExpression(@"^[a-zA-Z]+$", ErrorMessage = "Nome inválido, apenas letras são permitidas")]
+        [RegularExpression(@"^[A-Za-záàâãéèêíïóôõöúçñÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ ]+$", ErrorMessage = "Nome inválido, apenas letras são permitidas")]
         public string Nome { get; set; }
         [Required(ErrorMessage = "Necessário incluir o CNPJ do fornecedor")]
         [ValidCNPJ(ErrorMessage = "CNPJ inválido")]

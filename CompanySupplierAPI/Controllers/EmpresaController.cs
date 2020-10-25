@@ -58,12 +58,12 @@ namespace CompanySupplierAPI.Controllers
 
         //GET Empresa list by query
         [HttpGet("search")]
-        public async Task<ActionResult<CNPJModel[]>> GetEmpresaListByQuery ([FromQuery] EmpresaParameters empresaParameters)
+        public async Task<ActionResult<OutputEmprestaListModel[]>> GetEmpresaListByQuery ([FromQuery] QueryEmpresaParameters empresaParameters)
         {
             try
             {
-                var CNPJList = await _empresaService.GetEmpresasCNPJByQueryAsync(empresaParameters);
-                return CNPJList;
+                var EmpresaList = await _empresaService.GetEmpresasCNPJByQueryAsync(empresaParameters);
+                return EmpresaList;
             }
             catch (Exception ex)
             {

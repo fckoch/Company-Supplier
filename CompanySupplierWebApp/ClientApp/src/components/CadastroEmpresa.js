@@ -3,6 +3,7 @@ import { Form, Button } from 'react-bootstrap';
 import EmpresaService from '../services/empresaService.js';
 import Alert from 'react-bootstrap/Alert';
 import Validator from '../services/validator.js';
+import { mask, unMask } from 'remask';
 
 class CadastroEmpresa extends Component {
   constructor(props) {
@@ -31,8 +32,10 @@ class CadastroEmpresa extends Component {
   }
   
   onChangeCNPJ = (e) => {
+    const originalValue = unMask(e.target.value);
+    const maskedValue = mask(originalValue, ['99.999.999/9999-99'])
     this.setState({
-      cnpj: e.target.value,
+      cnpj: maskedValue,
       displayAlert: false
     })
   }
@@ -47,7 +50,7 @@ class CadastroEmpresa extends Component {
   validateForm = () => {
     let isError = false;
 
-    if (this.state.nomeFantasia.length < 2 || (/[^a-z]/i.test(this.state.nomeFantasia))) {
+    if (this.state.nomeFantasia.length < 2 || (!/^[A-Za-záàâãéèêíïóôõöúçñÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ ]+$/i.test(this.state.nomeFantasia))) {
       isError = true
       this.setState({
         nomeFantasiaIsInvalid: true,
@@ -93,7 +96,6 @@ class CadastroEmpresa extends Component {
       ufErrorMessage: '',
       cnpjIsInvalid: false,
       cnpjErrorMessage: '',
-      alertMessage: '',
       alertMessage: '',
       displayAlert: false,
     })
@@ -154,9 +156,6 @@ class CadastroEmpresa extends Component {
               <Form.Control.Feedback type="invalid">
               {this.state.cnpjErrorMessage}
               </Form.Control.Feedback>
-              <Form.Text id="CNPJHelp" muted>
-              CNPJ deve conter caracteres separadores (Exemplo: XX.XXX.XXX/XXXX-XX)
-              </Form.Text>
             </Form.Group>
             <Form.Group controlId="formGridState">
               <Form.Label>UF</Form.Label>

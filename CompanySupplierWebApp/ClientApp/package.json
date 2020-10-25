@@ -17,7 +17,9 @@
     "react-router-dom": "^5.1.2",
     "react-scripts": "^3.4.1",
     "reactstrap": "^8.4.1",
-    "rimraf": "^2.6.2"
+    "remask": "0.1.0-alpha.5",
+    "rimraf": "^2.6.2",
+    "vanilla-masker": "^1.2.0"
   },
   "devDependencies": {
     "ajv": "^6.9.1",

@@ -54,9 +54,10 @@ namespace CompanySupplierAPI.Services
             return await query.FirstOrDefaultAsync();
         }
 
-        public bool FornecedorExists(string CPFCNPJ)
+        public bool FornecedorExistsOnEmpresa(string CPFCNPJ, int empresaId)
         {
-            return _context.Fornecedores.Any(f => f.CPFCNPJ == CPFCNPJ);
+            IQueryable<Fornecedor> query = _context.Fornecedores;
+            return query.Where(f => f.EmpresaId == empresaId).Any(f => f.CPFCNPJ == CPFCNPJ);
         }
 
         public void Add(Fornecedor entity)

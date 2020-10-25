@@ -54,11 +54,11 @@ namespace CompanySupplierAPI.Services
             return await query.ToArrayAsync();
         }
 
-        public async Task<CNPJModel[]> GetEmpresasCNPJByQueryAsync(EmpresaParameters empresaParameters)
+        public async Task<OutputEmprestaListModel[]> GetEmpresasCNPJByQueryAsync(QueryEmpresaParameters empresaParameters)
         {
             IQueryable<Empresa> query = _context.Empresas;
             query = query.OrderBy(e => e.CNPJ).Where(e => e.CNPJ.Substring(0, empresaParameters.CNPJ.Length) == empresaParameters.CNPJ);
-            return await query.Select(e => new CNPJModel { CNPJ = e.CNPJ, EmpresaId = e.EmpresaId, UF = e.UF, NomeFantasia = e.NomeFantasia}).ToArrayAsync();
+            return await query.Select(e => new OutputEmprestaListModel { CNPJ = e.CNPJ, EmpresaId = e.EmpresaId, UF = e.UF, NomeFantasia = e.NomeFantasia}).ToArrayAsync();
         }
     }
 }

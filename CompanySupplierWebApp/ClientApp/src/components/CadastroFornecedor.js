@@ -4,6 +4,7 @@ import EmpresaService from '../services/empresaService.js';
 import { AsyncTypeahead } from 'react-bootstrap-typeahead';
 import FornecedorService from '../services/fornecedorService.js';
 import Validator from '../services/validator.js';
+import { mask, unMask } from 'remask';
 
 class CadastroFornecedor extends Component {
   constructor(props) {
@@ -12,7 +13,7 @@ class CadastroFornecedor extends Component {
       options: [],
       isLoading: false,
       cnpjEmpresa: '',
-      cnpjEmpresaIsInvalid:'',
+      cnpjEmpresaIsInvalid: false,
       cnpjEmpresaErrorMessage: '',
       empresaId: '',
       empresaSelection: false,
@@ -71,15 +72,19 @@ class CadastroFornecedor extends Component {
   }
 
   onChangeCNPJFornecedor = (e) => {
+    const originalValue = unMask(e.target.value);
+    const maskedValue = mask(originalValue, ['99.999.999/9999-99'])
     this.setState({
-      cnpjFornecedor: e.target.value,
+      cnpjFornecedor: maskedValue,
       displayAlert: false
     })
   }
 
   onChangeCPFFornecedor = (e) => {
+    const originalValue = unMask(e.target.value);
+    const maskedValue = mask(originalValue, ['999.999.999-99'])
     this.setState({
-      cpfFornecedor: e.target.value,
+      cpfFornecedor: maskedValue,
       displayAlert: false
     })
   }
@@ -103,8 +108,10 @@ class CadastroFornecedor extends Component {
   }
 
   onChangeTelefoneInput = (e) => {
+    const originalValue = unMask(e.target.value);
+    const maskedValue = mask(originalValue, ['(99) 9999-9999', '(99) 9 9999-9999'])
     this.setState({
-      telefoneInput: e.target.value,
+      telefoneInput: maskedValue,
       displayAlert: false
     })
   }
@@ -175,7 +182,7 @@ class CadastroFornecedor extends Component {
         cnpjEmpresaIsInvalid: true
       })
     }
-    if (this.state.nomeFornecedor.length < 2 || (/[^a-z]/i.test(this.state.nomeFornecedor))) {
+    if (this.state.nomeFornecedor.length < 2 || (!/^[A-Za-záàâãéèêíïóôõöúçñÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ ]+$/i.test(this.state.nomeFornecedor))) {
       isError = true
       this.setState({
         nomeFornecedorIsInvalid: true,
@@ -209,7 +216,6 @@ class CadastroFornecedor extends Component {
       nomeFornecedorErrorMessage: '',
       cnpjFornecedorIsInvalid: false,
       cnpjFornecedorErrorMessage: '',
-      alertMessage: '',
       alertMessage: '',
       displayAlert: false,
     })
@@ -249,7 +255,7 @@ class CadastroFornecedor extends Component {
         cnpjEmpresaIsInvalid: true
       })
     }
-    if (this.state.nomeFornecedor.length < 2 || (/[^a-z]/i.test(this.state.nomeFornecedor))) {
+    if (this.state.nomeFornecedor.length < 2 || (!/^[A-Za-záàâãéèêíïóôõöúçñÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ ]+$/i.test(this.state.nomeFornecedor))) {
       isError = true
       this.setState({
         nomeFornecedorIsInvalid: true,
@@ -357,7 +363,7 @@ class CadastroFornecedor extends Component {
                 id="async-search"
                 isLoading={this.state.isLoading}
                 labelKey="cnpj"
-                minLength={3}
+                minLength={1}
                 onSearch={this.handleSearch}
                 options={this.state.options}
                 placeholder="Pesquise por um CNPJ..."
@@ -446,9 +452,6 @@ class CadastroFornecedor extends Component {
               <Form.Control.Feedback type="invalid">
               {this.state.cnpjFornecedorErrorMessage}
               </Form.Control.Feedback>
-              <Form.Text id="CNPJHelp" muted>
-              CNPJ deve conter caracteres separadores (Exemplo: XX.XXX.XXX/XXXX-XX)
-              </Form.Text>
             </Form.Group>
             <div className="text-center">
               <Button onClick={this.onSubmitPessoaJuridica} style={{margin: "10px 0px 30px"}} variant="primary" type="submit">
@@ -468,9 +471,6 @@ class CadastroFornecedor extends Component {
                   <Form.Control.Feedback type="invalid">
                   {this.state.cpfFornecedorErrorMessage}
                   </Form.Control.Feedback>
-                  <Form.Text id="CPFHelp" muted>
-                  CPF deve conter caracteres separadores (Exemplo: XXX.XXX.XXX-XX)
-                  </Form.Text>
                 </Form.Group>
               </Col>
               <Col>

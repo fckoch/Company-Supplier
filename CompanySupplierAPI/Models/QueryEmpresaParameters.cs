@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace CompanySupplierAPI.Models
 {
-    public class EmpresaParameters
+    public class QueryEmpresaParameters
     {
         public string CNPJ { get; set; }
     }

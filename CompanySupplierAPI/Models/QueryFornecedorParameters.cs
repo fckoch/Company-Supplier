@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace CompanySupplierAPI.Models
 {
-    public class FornecedorParameters
+    public class QueryFornecedorParameters
     {
         public string OrderBy { get; set; }
     }
