@@ -16,7 +16,7 @@ namespace CompanySupplierAPI.Models
         [Required(ErrorMessage = "Necessário incluir o CPF do fornecedor")]
         [ValidCPF(ErrorMessage = "CPF inválido")]
         public string CPFCNPJ { get; set; }
-        [Required]
+        [Required(ErrorMessage = "CPF já cadastrado no sistema")]
         public DateTime DataCadastro{ get; set; }
         [Required]
         public virtual ICollection<TelefoneModel> Telefones { get; set; }

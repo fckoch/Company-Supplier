@@ -36,7 +36,6 @@ namespace CompanySupplierAPI
             services.AddDbContext<CompanySupplierContext>(options => options.UseSqlServer(_configuration.GetConnectionString("CompanySupplier")));
             services.AddScoped<EmpresaService>();
             services.AddScoped<FornecedorService>();
-            services.AddScoped<Error>();
             services.AddAutoMapper(typeof(Startup));
 
             services.AddCors();

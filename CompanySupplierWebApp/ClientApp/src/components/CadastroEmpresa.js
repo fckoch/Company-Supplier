@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Form, Button } from 'react-bootstrap';
 import EmpresaService from '../services/empresaService.js';
 import Alert from 'react-bootstrap/Alert';
+import Validator from '../services/validator.js';
 
 class CadastroEmpresa extends Component {
   constructor(props) {
@@ -43,71 +44,92 @@ class CadastroEmpresa extends Component {
     })
   }
 
-  onSubmit = (e) => {
-    e.preventDefault();
+  validateForm = () => {
+    let isError = false;
 
-    EmpresaService.addNewEmpresa(this.state.nomeFantasia, this.state.cnpj, this.state.uf)
-    .then(response => {
-      if (response.status === 201) {
-        this.setState({
-          nomeFantasia: '',
-          cnpj: '',
-          uf: '',
-          nomeFantasiaErrorMessage: '',
-          cnpjErrorMessage: '',
-          ufErrorMessage: '',
-          nomeFantasiaIsInvalid: false,
-          cnpjIsInvalid: false,
-          ufIsInvalid: false,
-          alertMessage: 'Empresa cadastrada com sucesso',
-          displayAlert: true,
-          alertType: 'success',
-        })
-      }
-    })
-    .catch(error => {
-      if (error.response.data.errors.NomeFantasia) {
-        this.setState({
-          nomeFantasiaErrorMessage: error.response.data.errors.NomeFantasia[0],
-          nomeFantasiaIsInvalid: true 
-        })
-      }
-      else if (error.response.data.errors.NomeFantasia === undefined) {
-        this.setState({
-          nomeFantasiaErrorMessage: '',
-          nomeFantasiaIsInvalid: false
-        })
-      }
-      if (error.response.data.errors.CNPJ) {
-        this.setState({
-          cnpjErrorMessage: error.response.data.errors.CNPJ[0],
-          cnpjIsInvalid: true
-        })
-      }
-      else if (error.response.data.errors.CNPJ === undefined) {
-        this.setState({
-          cnpjErrorMessage: '',
-          cnpjIsInvalid: false
-        })
-      }
-      if (error.response.data.errors.UF) {
-        this.setState({
-          ufErrorMessage: error.response.data.errors.UF[0],
-          ufIsInvalid: true,
-        })
-      }
-      else if (error.response.data.errors.UF === undefined) {
-        this.setState({
-          ufErrorMessage: '',
-          ufIsInvalid: false
-        })
-      }
+    if (this.state.nomeFantasia.length < 2 || (/[^a-z]/i.test(this.state.nomeFantasia))) {
+      isError = true
+      this.setState({
+        nomeFantasiaIsInvalid: true,
+        nomeFantasiaErrorMessage: 'Nome invalido',
+      })
+    }
+
+    const UFs = ["AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO"];
+    if (!UFs.includes(this.state.uf)) {
+      isError = true
+      this.setState({
+        ufIsInvalid: true,
+        ufErrorMessage: 'UF invalido',
+      })
+    }
+    
+    if (!Validator.validateCNPJ(this.state.cnpj)) {
+      isError = true
+      this.setState({
+        cnpjIsInvalid: true,
+        cnpjErrorMessage: 'CNPJ invalido',
+      })
+    }
+
+    if (isError) {
       this.setState({
         alertMessage: 'Erro ao cadastrar empresa',
         displayAlert: true,
-        alertType: 'danger',
+        alertType: 'danger'
       })
-    })    
+    }
+
+    return isError;
+  }
+
+  onSubmit = (e) => {
+    e.preventDefault();
+
+    this.setState({
+      nomeFantasiaIsInvalid: false,
+      nomeFantasiaErrorMessage: '',
+      ufIsInvalid: false,
+      ufErrorMessage: '',
+      cnpjIsInvalid: false,
+      cnpjErrorMessage: '',
+      alertMessage: '',
+      alertMessage: '',
+      displayAlert: false,
+    })
+
+    const err = this.validateForm();
+
+    if (!err) {
+      EmpresaService.addNewEmpresa(this.state.nomeFantasia, this.state.cnpj, this.state.uf)
+      .then(response => {
+        if (response.status === 201) {
+          this.setState({
+            nomeFantasia: '',
+            cnpj: '',
+            uf: '',
+            nomeFantasiaErrorMessage: '',
+            cnpjErrorMessage: '',
+            ufErrorMessage: '',
+            nomeFantasiaIsInvalid: false,
+            cnpjIsInvalid: false,
+            ufIsInvalid: false,
+            alertMessage: 'Empresa cadastrada com sucesso',
+            displayAlert: true,
+            alertType: 'success',
+          })
+        }
+      })
+      .catch(error => {
+        if (error.response.status === 400) {
+          this.setState({
+            alertMessage: error.response.data,
+            displayAlert: true,
+            alertType: 'danger',
+          })
+        }
+      });
+    }  
   }
 
   render() {

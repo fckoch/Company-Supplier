@@ -3,6 +3,7 @@ import { Form, Button, Alert, Col, Row} from 'react-bootstrap';
 import EmpresaService from '../services/empresaService.js';
 import { AsyncTypeahead } from 'react-bootstrap-typeahead';
 import FornecedorService from '../services/fornecedorService.js';
+import Validator from '../services/validator.js';
 
 class CadastroFornecedor extends Component {
   constructor(props) {
@@ -14,6 +15,7 @@ class CadastroFornecedor extends Component {
       cnpjEmpresaIsInvalid:'',
       cnpjEmpresaErrorMessage: '',
       empresaId: '',
+      empresaSelection: false,
       ufEmpresa: '',
       nomeFantasiaEmpresa: '',
       nomeFornecedor: '',
@@ -48,7 +50,8 @@ class CadastroFornecedor extends Component {
         cnpjEmpresa: data.cnpj,
         empresaId: data.empresaId,
         ufEmpresa: data.uf,
-        nomeFantasiaEmpresa: data.nomeFantasia  
+        nomeFantasiaEmpresa: data.nomeFantasia,
+        empresaSelection: true
       });
     }
   }
@@ -120,6 +123,7 @@ class CadastroFornecedor extends Component {
       nomeFantasiaEmpresa: '',
       empresaId: '',
       displayAlert: false,
+      empresaSelection: false,
     })
   }
 
@@ -162,19 +166,55 @@ class CadastroFornecedor extends Component {
     })
   }
 
-  validateEmpresaSelection = () => {
+  validateFormPessoaJuridica = () => {
     let isError = false;
-    if (this.state.empresaId === '') {
+    if (!this.state.empresaSelection) {
       isError = true
+      this.setState({
+        cnpjEmpresaErrorMessage: 'Empresa não selecionada',
+        cnpjEmpresaIsInvalid: true
+      })
     }
-    else {
-      isError = false
+    if (this.state.nomeFornecedor.length < 2 || (/[^a-z]/i.test(this.state.nomeFornecedor))) {
+      isError = true
+      this.setState({
+        nomeFornecedorIsInvalid: true,
+        nomeFornecedorErrorMessage: 'Nome invalido',
+      })
+    }
+    if (!Validator.validateCNPJ(this.state.cnpjFornecedor)) {
+      isError = true
+      this.setState({
+        cnpjFornecedorIsInvalid: true,
+        cnpjFornecedorErrorMessage: 'CNPJ invalido',
+      })
+    }
+    if (isError) {
+      this.setState({
+        alertMessage: 'Erro ao cadastrar fornecedor',
+        displayAlert: true,
+        alertType: 'danger'
+      })
     }
     return isError;
   }
 
-  onSubmitPessoaJuridica = () => {
-    const err = this.validateEmpresaSelection();
+  onSubmitPessoaJuridica = (e) => {
+    e.preventDefault();
+
+    this.setState({
+      cnpjEmpresaIsInvalid: false,
+      cnpjEmpresaErrorMessage: '',
+      nomeFornecedorIsInvalid: false,
+      nomeFornecedorErrorMessage: '',
+      cnpjFornecedorIsInvalid: false,
+      cnpjFornecedorErrorMessage: '',
+      alertMessage: '',
+      alertMessage: '',
+      displayAlert: false,
+    })
+
+    const err = this.validateFormPessoaJuridica();
     if (!err) {
       FornecedorService.addNewFornecedorPessoaJuridica(this.state.empresaId, this.state.nomeFornecedor, this.state.cnpjFornecedor, this.state.telefones)
       .then(response => {
@@ -186,64 +226,79 @@ class CadastroFornecedor extends Component {
           alertMessage: 'Fornecedor cadastrado com sucesso',
           displayAlert: true,
           alertType: 'success',
-          nomeFornecedorErrorMessage: '',
-          nomeFornecedorIsInvalid: false,
-          cnpjEmpresaErrorMessage: '',
-          cnpjFornecedorIsInvalid: false
-
         })
       })
       .catch(error => {
         if (error.response.status === 400) {
-          if (error.response.data.errors.Nome) {
-            this.setState({
-              nomeFornecedorErrorMessage: error.response.data.errors.Nome[0],
-              nomeFornecedorIsInvalid: true,
-            })
-          }
-          else if (error.response.data.errors.Nome === undefined) {
-            this.setState({
-              nomeFornecedorErrorMessage: '',
-              nomeFornecedorIsInvalid: false,
-            })
-          }
-          if (error.response.data.errors.CPFCNPJ) {
-            this.setState({
-              cnpjFornecedorErrorMessage: error.response.data.errors.CPFCNPJ[0],
-              cnpjFornecedorIsInvalid: true
-            })
-          }
-          else if (error.response.data.errors.CPFCNPJ === undefined) {
-            this.setState({
-              cnpjFornecedorErrorMessage: '',
-              cnpjFornecedorIsInvalid: false
-            })
-          }
           this.setState({
-            alertMessage: 'Falha ao cadastrar o fornecedor',
+            alertMessage: error.response.data,
             displayAlert: true,
             alertType: 'danger',
           })
         }
-        else {
-          this.setState({
-            alertMessage: 'Falha ao cadastrar o fornecedor',
-            displayAlert: true,
-            alertType: 'danger',
-          })
-        }
-      })
-    } else {
-      this.setState({
-        alertMessage: 'Empresa não foi selecionada',
-        displayAlert: true,
-        alertType: 'danger',
-      })
+      });
     }
   }
 
-  onSubmitPessoaFisica = () => {
-    const err = this.validateEmpresaSelection();
+  validateFormPessoaFisica = () => {
+    let isError = false;
+    if (!this.state.empresaSelection) {
+      isError = true
+      this.setState({
+        cnpjEmpresaErrorMessage: 'Empresa não selecionada',
+        cnpjEmpresaIsInvalid: true
+      })
+    }
+    if (this.state.nomeFornecedor.length < 2 || (/[^a-z]/i.test(this.state.nomeFornecedor))) {
+      isError = true
+      this.setState({
+        nomeFornecedorIsInvalid: true,
+        nomeFornecedorErrorMessage: 'Nome invalido',
+      })
+    }
+    if (!Validator.validateCPF(this.state.cpfFornecedor)) {
+      isError = true
+      this.setState({
+        cpfFornecedorIsInvalid: true,
+        cpfFornecedorErrorMessage: 'CPF invalido',
+      })
+    }
+    if (!/^[0-9X.-]*$/.test(this.state.rgFornecedor) || this.state.rgFornecedor === '') {
+      isError = true
+      this.setState({
+        rgFornecedorIsInvalid: true,
+        rgFornecedorErrorMessage: 'RG invalido'
+      })
+    }
+    if (isError) {
+      this.setState({
+        alertMessage: 'Erro ao cadastrar fornecedor',
+        displayAlert: true,
+        alertType: 'danger'
+      })
+    }
+    return isError;
+  }
+
+  onSubmitPessoaFisica = (e) => {
+    e.preventDefault();
+
+    this.setState({
+      cnpjEmpresaIsInvalid: false,
+      cnpjEmpresaErrorMessage: '',
+      nomeFornecedorIsInvalid: false,
+      nomeFornecedorErrorMessage: '',
+      cpfFornecedorIsInvalid: false,
+      cpfFornecedorErrorMessage: '',
+      rgFornecedorIsInvalid: false,
+      rgFornecedorErrorMessage: '',
+      dataNascimentoFornecedorIsInvalid: false,
+      dataNascimentoFornecedorErrorMessage: '',
+      alertMessage: '',
+      displayAlert: false,
+    })
+
+    const err = this.validateFormPessoaFisica();
     if (!err) {
       FornecedorService.addNewFornecedorPessoaFisica(this.state.empresaId, this.state.nomeFornecedor, this.state.cpfFornecedor, this.state.telefones, this.state.rgFornecedor, this.state.dataNascimentoFornecedor)
       .then(response => {
@@ -268,74 +323,19 @@ class CadastroFornecedor extends Component {
         })
       })
       .catch(error => {
-        if (error.response.status === 400) {
-          if (error.response.data.errors.dataNascimento) {
-            this.setState({
-              dataNascimentoFornecedorErrorMessage: error.response.data.errors.dataNascimento,
-              dataNascimentoFornecedorIsInvalid: true,
-            })
-          }
-          else if (error.response.data.errors.dataNascimento === undefined) {
-            this.setState({
-              dataNascimentoFornecedorErrorMessage: '',
-              dataNascimentoFornecedorIsInvalid: false,
-            })
-          }
-          if (error.response.data.errors.Nome) {
-            this.setState({
-              nomeFornecedorErrorMessage: error.response.data.errors.Nome[0],
-              nomeFornecedorIsInvalid: true,
-            })
-          }
-          else if (error.response.data.errors.Nome === undefined) {
-            this.setState({
-              nomeFornecedorErrorMessage: '',
-              nomeFornecedorIsInvalid: false,
-            })
-          }
-          if (error.response.data.errors.CPFCNPJ) {
-            this.setState({
-              cpfFornecedorErrorMessage: error.response.data.errors.CPFCNPJ[0],
-              cpfFornecedorIsInvalid: true
-            })
-          }
-          else if (error.response.data.errors.CPFCNPJ === undefined) {
-            this.setState({
-              cpfFornecedorErrorMessage: '',
-              cpfFornecedorIsInvalid: false
-            })
-          }
-          if (error.response.data.errors.RG) {
-            this.setState({
-              rgFornecedorErrorMessage: error.response.data.errors.RG[0],
-              rgFornecedorIsInvalid: true
-            })
-          }
-          else if (error.response.data.errors.RG === undefined) {
-            this.setState({
-              rgFornecedorErrorMessage: '',
-              rgFornecedorIsInvalid: false
-            })
-          } 
+        if (error.response.status === 400)
+        try {
           this.setState({
-            alertMessage: 'Falha ao cadastrar o fornecedor',
+            dataNascimentoFornecedorIsInvalid: true,
+            dataNascimentoFornecedorErrorMessage: error.response.data.errors.DataNascimento[0]
+          })
+        } catch {
+          this.setState({
+            alertMessage: error.response.data,
             displayAlert: true,
-            alertType: 'danger',
+            alertType: 'danger'
           })
         }
-        else {
-          this.setState({
-            alertMessage: 'Falha ao cadastrar o fornecedor',
-            displayAlert: true,
-            alertType: 'danger',
-          })
-        }
-      })
-    } else {
-      this.setState({
-        alertMessage: 'Empresa não foi selecionada',
-        displayAlert: true,
-        alertType: 'danger',
       })
     }
   }
@@ -365,6 +365,7 @@ class CadastroFornecedor extends Component {
                 searchText="Pesquisando..."
                 onInputChange={this.onChangeCNPJEmpresa}
                 onChange={this.onEmpresaSelection}
+                isInvalid={this.state.cnpjEmpresaIsInvalid}
               />
             </Form.Group>
             <h5 style={{paddingTop: "10px"}}>Dados da empresa selecionada</h5>

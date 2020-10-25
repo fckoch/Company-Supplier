@@ -163,16 +163,6 @@ class Home extends Component {
                         {this.renderTelefones(telefones)}
                       </div>
                     </td>
-                    {/*<td>
-                      <IconContext.Provider value={{ size: "1.2em", color: "black" }}>
-                        <div style={{textAlign: 'center'}}>
-                          <MdPhone onClick={() => {
-                            console.log(popOverShow)
-                          }}
-                          />
-                        </div>
-                      </IconContext.Provider>
-                    </td>*/}
                   </tr>
                 )
               })}

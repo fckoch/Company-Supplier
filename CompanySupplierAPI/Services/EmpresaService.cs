@@ -13,12 +13,10 @@ namespace CompanySupplierAPI.Services
     public class EmpresaService
     {
         private CompanySupplierContext _context;
-        private readonly IMapper _mapper;
 
-        public EmpresaService(CompanySupplierContext context, IMapper mapper)
+        public EmpresaService(CompanySupplierContext context)
         {
             _context = context;
-            _mapper = mapper;
         }
 
         public void Add(Empresa entity)
@@ -29,6 +27,11 @@ namespace CompanySupplierAPI.Services
         public void Delete(Empresa entity)
         {
             _context.Empresas.Remove(entity);
+        }
+
+        public bool EmpresaExists(string CNPJ)
+        {
+            return _context.Empresas.Any(e => e.CNPJ == CNPJ);
         }
 
         public async Task<bool> SaveChangesAsync()

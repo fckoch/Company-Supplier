@@ -19,14 +19,12 @@ namespace CompanySupplierAPI.Controllers
         private readonly EmpresaService _empresaService;
         private readonly FornecedorService _fornecedorService;
         private readonly IMapper _mapper;
-        private readonly Error _error;
 
-        public FornecedorController(EmpresaService empresaService, FornecedorService fornecedorService, IMapper mapper, Error error)
+        public FornecedorController(EmpresaService empresaService, FornecedorService fornecedorService, IMapper mapper)
         {
             _empresaService = empresaService;
             _fornecedorService = fornecedorService;
             _mapper = mapper;
-            _error = error;
         }
 
         //Get all Fornecedores from Empresa ordered by
@@ -83,9 +81,14 @@ namespace CompanySupplierAPI.Controllers
             try
             {
                 var empresa = await _empresaService.GetEmpresaByIdAsync(empresaId);
-                var fornecedor = _mapper.Map<Fornecedor>(model);
+                if (empresa == null)
+                    return NotFound("Empresa não encontrada");
 
-                empresa.Fornecedors.Add(fornecedor);
+                var fornecedor = _mapper.Map<Fornecedor>(model);
+                if (_fornecedorService.FornecedorExists(fornecedor.CPFCNPJ))
+                    return BadRequest("CNPJ já cadastrado no sistema");
+
+                    empresa.Fornecedors.Add(fornecedor);
 
                 if (await _fornecedorService.SaveChangesAsync())
                 {
@@ -110,14 +113,18 @@ namespace CompanySupplierAPI.Controllers
             try
             {
                 var empresa = await _empresaService.GetEmpresaByIdAsync(empresaId);
+                if (empresa == null)
+                    return NotFound("Empresa não encontrada");
+
                 var fornecedor = _mapper.Map<Fornecedor>(model);
+                if (_fornecedorService.FornecedorExists(fornecedor.CPFCNPJ))
+                    return BadRequest("CPF já cadastrado no sistema");
 
                 var today = DateTime.Today;
                 var idadeFornecedor = today.Year - fornecedor.DataNascimento.Value.Year;
                 if (empresa.UF == "PR" && idadeFornecedor < 18)
                 {
-                    Error erro = new Error();
-                    return BadRequest(erro);
+                    return BadRequest("Não é permitido cadastro de fornecedor menor de idade em empresa do PR");
                 }
 
                 empresa.Fornecedors.Add(fornecedor);

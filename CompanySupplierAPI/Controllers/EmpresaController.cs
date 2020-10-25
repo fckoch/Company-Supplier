@@ -78,6 +78,9 @@ namespace CompanySupplierAPI.Controllers
             try
             {
                 var empresa = _mapper.Map<Empresa>(model);
+                if (_empresaService.EmpresaExists(empresa.CNPJ))
+                    return BadRequest("CNPJ já cadastrado no sistema");
+
                 _empresaService.Add(empresa);
 
                 if (await _empresaService.SaveChangesAsync())

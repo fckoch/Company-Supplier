@@ -13,12 +13,10 @@ namespace CompanySupplierAPI.Services
     public class FornecedorService
     {
         private CompanySupplierContext _context;
-        private readonly IMapper _mapper;
 
-        public FornecedorService(CompanySupplierContext context, IMapper mapper)
+        public FornecedorService(CompanySupplierContext context)
         {
             _context = context;
-            _mapper = mapper;
         }
 
         public async Task<Fornecedor[]> GetAllFornecedoresByEmpresaAsync(int EmpresaId)
@@ -54,6 +52,11 @@ namespace CompanySupplierAPI.Services
             IQueryable<Fornecedor> query = _context.Fornecedores;
             query = query.Where(f => f.FornecedorId == FornecedorId).Include(f => f.Telefones);
             return await query.FirstOrDefaultAsync();
+        }
+
+        public bool FornecedorExists(string CPFCNPJ)
+        {
+            return _context.Fornecedores.Any(f => f.CPFCNPJ == CPFCNPJ);
         }
 
         public void Add(Fornecedor entity)
